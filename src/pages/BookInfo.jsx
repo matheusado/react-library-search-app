@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useState } from "react";
+import React from "react";
 import { Link, useParams } from "react-router-dom";
 import Rating from "../components/ui/Rating";
 import Price from "../components/ui/Price";
@@ -8,14 +8,22 @@ import Book from "../components/ui/Book";
 const BookInfo = ({ books, addToCart, cart }) => {
   const { id } = useParams();
   const book = books.find((book) => +book.id === +id);
-  const [added] = useState(false);
 
   function addBookToCart(book) {
     addToCart(book);
   }
 
   function bookExistsOnCart() {
-    return cart.find((book) => book.id === +id);
+    return cart.some((book) => +book.id === +id);
+  }
+
+  if (!book) {
+    return (
+      <div className="books__container">
+        <h2>Book not found</h2>
+        <Link to="/books">Back to Books</Link>
+      </div>
+    );
   }
 
   return (
@@ -27,13 +35,19 @@ const BookInfo = ({ books, addToCart, cart }) => {
               <Link to="/books" className="book__link">
                 <FontAwesomeIcon icon="arrow-left" />
               </Link>
+
               <Link to="/books" className="book__link">
                 <h2 className="book__selected--title--top">Books</h2>
               </Link>
             </div>
+
             <div className="book__selected">
               <figure className="book__selected--figure">
-                <img src={book.url} alt="" className="book__selected--img" />
+                <img
+                  src={book.url}
+                  alt={book.title}
+                  className="book__selected--img"
+                />
               </figure>
 
               <div className="book__selected--description">
@@ -47,14 +61,17 @@ const BookInfo = ({ books, addToCart, cart }) => {
                     salePrice={book.salePrice}
                   />
                 </div>
+
                 <div className="book__summary">
                   <h3 className="book__summary--title">Summary</h3>
+
                   {book.summary?.map((paragraph, index) => (
                     <p className="book__summary--para" key={index}>
                       {paragraph}
                     </p>
                   ))}
                 </div>
+
                 {bookExistsOnCart() ? (
                   <Link to="/cart" className="btn">
                     Checkout
@@ -68,11 +85,13 @@ const BookInfo = ({ books, addToCart, cart }) => {
             </div>
           </div>
         </div>
+
         <div className="books__container">
           <div className="row">
             <div className="book__selected--top">
               <h2 className="book__selected--title--top">Recommended Books</h2>
             </div>
+
             <div className="books">
               {books
                 .filter((book) => book.rating === 5 && +book.id !== +id)
